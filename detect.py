@@ -6,8 +6,6 @@ Created on Sat Mar 10 19:13:37 2018
 @author: pratyush
 """
 
-#https://stackoverflow.com/questions/34026097/using-a-pi-camera-module-with-opencv-python
-
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import cv2
@@ -28,21 +26,38 @@ rawCapture = PiRGBArray(camera, size=(320, 240))
 
 display_window = cv2.namedWindow("Faces")
 
-path = os.path.join(sys.path[0], 'face_classifier.xml')
-face_cascade = cv2.CascadeClassifier(path)
+#face classifier
+pathtoface = os.path.join(sys.path[0], 'face_classifier.xml')
+face_cascade = cv2.CascadeClassifier(pathtoface)
+
+#full body classifier
+pathtobody = os.path.join(sys.path[0], 'full_body.xml')
+body_cascade = cv2.CascadeClassifier(pathtobody)
+
+#eyebrow classifier
+
 
 time.sleep(1)
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 
     image = frame.array
+    gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
     #FACE DETECTION STUFF
-    gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.1, 5)
     for (x,y,w,h) in faces:
         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
         GPIO.output(pin, GPIO.HIGH)
+
+    #BODY DETECTION STUFF
+    bodies = body_cascade.detectMultiScale(gray, 1.1, 5)
+    for (x,y,w,h) in bodies:
+        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+        GPIO.output(pin, GPIO.HIGH)
+
+    if faces or bodies:
+        GPIO.output(pin, GPIO.LOW)
 
     #DISPLAY TO WINDOW
     cv2.imshow("Faces", image)
