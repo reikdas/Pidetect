@@ -56,7 +56,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
         GPIO.output(pin, GPIO.HIGH)
 
-    if faces or bodies:
+    if faces is None or bodies is None:
         GPIO.output(pin, GPIO.LOW)
 
     #DISPLAY TO WINDOW
